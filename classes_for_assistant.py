@@ -1,5 +1,6 @@
 from collections import UserDict
 from datetime import datetime, date, timedelta
+import dateparser
 
 
 class AddressBook(UserDict):
@@ -13,7 +14,8 @@ class Record:
         self.phones = []
         if phone:
             self.phones.append(phone)
-        self.birthday = birthday
+        if birthday:
+            self.birthday = birthday
 
     def add_phone(self):
         pass
@@ -70,6 +72,24 @@ class Phone(Field):
         else:
             return f'Wrong number'
         
+class Birthday:
+    def __init__(self, value=None):
+        if value:
+            self.value = value
+    
+    @property
+    def birthday(self):
+        return self.birthday
+    
+    @birthday.setter
+    def birthday(self, value):
+        try:
+            date_parce = dateparser.parse(value)
+            self.value = date_parce
+        except:
+            raise f'Wrong birthday date'
+
+        
              
 
 
@@ -79,5 +99,3 @@ if __name__ == "__main__":
     birthday = '19-02-1999'
     rec = Record(name, phone, birthday)
     maxx = Record('Max','0994690051','19-02-1999')
-    rec.days_to_birthday
-    maxx.days_to_birthday
