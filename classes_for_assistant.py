@@ -39,24 +39,24 @@ class Field:
     def __init__(self, some_value):
         self.value = some_value
 
-
-class Name(Field):
     @property
     def value(self):
         return self.some_value
-    
+
     @value.setter
     def value(self, value):
         self.some_value = value
 
 
+class Name(Field):
+    @Field.value.setter
+    def value(self, value):
+        self.some_value = value
+
+
 class Phone(Field):
-    @property
-    def phone_number(self):
-        return self.some_value
-    
-    @phone_number.setter
-    def phone_number(self, number): # для перевірки в візьмемо український номер
+    @Field.phone_number.setter
+    def phone_number(self, number):  # для перевірки в візьмемо український номер
         flag = True
         for i in number:
             if i.isdigit() or i in '+':
@@ -71,16 +71,17 @@ class Phone(Field):
                 self.some_value = number
         else:
             return f'Wrong number'
-        
+
+
 class Birthday:
     def __init__(self, value=None):
         if value:
             self.value = value
-    
+
     @property
     def birthday(self):
         return self.birthday
-    
+
     @birthday.setter
     def birthday(self, value):
         try:
@@ -89,13 +90,10 @@ class Birthday:
         except:
             raise f'Wrong birthday date'
 
-        
-             
-
 
 if __name__ == "__main__":
     name = Name('Bill')
     phone = Phone('1234567890')
     birthday = '19-02-1999'
     rec = Record(name, phone, birthday)
-    maxx = Record('Max','0994690051','19-02-1999')
+    maxx = Record('Max', '0994690051', '19-02-1999')
