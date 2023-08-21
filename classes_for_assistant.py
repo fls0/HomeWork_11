@@ -2,13 +2,25 @@ from collections import UserDict
 from datetime import datetime, date, timedelta
 import dateparser
 
+class Iterator:
+    MAX_ITERATIONS = 1
+
+    def __init__(self, n=5):
+        self.n = n
+        self.current_value = 0
+    
+    def __next__(self):
+        if self.current_value < self.MAX_ITERATIONS:
+            self.current_value += 1
+            return AddressBook.data[:self.n]
+        raise StopIteration
 
 class AddressBook(UserDict):
     def add_record(self, record):
         self.data[record.name.value] = record
 
-    def iterator(self, n_iterations):
-        pass
+    def __iter__(self, n_records):
+        return Iterator(n_records)
 
 
 class Record:
@@ -110,3 +122,4 @@ if __name__ == "__main__":
     assert isinstance(ab['Bill'].phones[0], Phone)
     assert ab['Bill'].phones[0].value == '1234567890'
     print('All Ok)')
+    print(ab.__iter__(1))
