@@ -12,7 +12,7 @@ class Iterator:
     def __next__(self):
         if self.current_value < self.MAX_ITERATIONS:
             self.current_value += 1
-            return 
+            return #!!!!!!!!!!!!!! доробити
         raise StopIteration
 
 class AddressBook(UserDict):
