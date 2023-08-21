@@ -7,6 +7,9 @@ class AddressBook(UserDict):
     def add_record(self, record):
         self.data[record.name.value] = record
 
+    def iterator(self, n_iterations):
+        pass
+
 
 class Record:
     def __init__(self, name, phone=None, birthday=None):
@@ -14,8 +17,9 @@ class Record:
         self.phones = []
         if phone:
             self.phones.append(phone)
+            self.phone = phone
         if birthday:
-            self.birthday = birthday
+            self.birthday = Birthday(birthday)
 
     def add_phone(self):
         pass
@@ -27,12 +31,7 @@ class Record:
         pass
 
     def days_to_birthday(self):
-        if self.birthday:
-            birthday = '-'.split()
-            d_now = datetime.now()
-            br_date = date(day=birthday[0], month=birthday[1], year=d_now.year)
-            result = timedelta(br_date - d_now)
-            return f'{result.days} days to birthday'
+        pass
 
 
 class Field:
@@ -49,13 +48,21 @@ class Field:
 
 
 class Name(Field):
-    @Field.value.setter
+    @property
+    def value(self):
+        return self.some_value
+
+    @value.setter
     def value(self, value):
         self.some_value = value
 
 
 class Phone(Field):
-    @Field.phone_number.setter
+    @property
+    def phone_number(self):
+        return self.some_value
+
+    @phone_number.setter
     def phone_number(self, number):  # для перевірки в візьмемо український номер
         flag = True
         for i in number:
@@ -74,13 +81,12 @@ class Phone(Field):
 
 
 class Birthday:
-    def __init__(self, value=None):
-        if value:
-            self.value = value
+    def __init__(self, value):
+        self.value = value
 
     @property
     def birthday(self):
-        return self.birthday
+        return self.value
 
     @birthday.setter
     def birthday(self, value):
@@ -96,4 +102,12 @@ if __name__ == "__main__":
     phone = Phone('1234567890')
     birthday = '19-02-1999'
     rec = Record(name, phone, birthday)
-    maxx = Record('Max', '0994690051', '19-02-1999')
+    ab = AddressBook()
+    ab.add_record(rec)
+    assert isinstance(ab['Bill'], Record)
+    assert isinstance(ab['Bill'].name, Name)
+    assert isinstance(ab['Bill'].phones, list)
+    assert isinstance(ab['Bill'].phones[0], Phone)
+    assert ab['Bill'].phones[0].value == '1234567890'
+    print('All Ok)')
+    br = Birthday('19-02-1999')
