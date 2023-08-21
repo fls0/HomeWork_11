@@ -5,7 +5,7 @@ import dateparser
 class Iterator:
     MAX_ITERATIONS = 1
 
-    def __init__(self, n=5):
+    def __init__(self, n=1):
         self.n = n
         self.current_value = 0
     
