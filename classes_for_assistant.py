@@ -12,7 +12,7 @@ class Iterator:
     def __next__(self):
         if self.current_value < self.MAX_ITERATIONS:
             self.current_value += 1
-            return AddressBook.data[:self.n]
+            return 
         raise StopIteration
 
 class AddressBook(UserDict):
@@ -122,4 +122,5 @@ if __name__ == "__main__":
     assert isinstance(ab['Bill'].phones[0], Phone)
     assert ab['Bill'].phones[0].value == '1234567890'
     print('All Ok)')
-    print(ab.__iter__(1))
+    for i in ab:
+        print(i)
