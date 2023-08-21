@@ -110,4 +110,3 @@ if __name__ == "__main__":
     assert isinstance(ab['Bill'].phones[0], Phone)
     assert ab['Bill'].phones[0].value == '1234567890'
     print('All Ok)')
-    br = Birthday('19-02-1999')
