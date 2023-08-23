@@ -1,126 +1,151 @@
 from collections import UserDict
 from datetime import datetime, date, timedelta
-import dateparser
-
-class Iterator:
-    MAX_ITERATIONS = 1
-
-    def __init__(self, n=1):
-        self.n = n
-        self.current_value = 0
-    
-    def __next__(self):
-        if self.current_value < self.MAX_ITERATIONS:
-            self.current_value += 1
-            return #!!!!!!!!!!!!!! доробити
-        raise StopIteration
-
-class AddressBook(UserDict):
-    def add_record(self, record):
-        self.data[record.name.value] = record
-
-    def __iter__(self, n_records):
-        return Iterator(n_records)
-
-
-class Record:
-    def __init__(self, name, phone=None, birthday=None):
-        self.name = name
-        self.phones = []
-        if phone:
-            self.phones.append(phone)
-            self.phone = phone
-        if birthday:
-            self.birthday = Birthday(birthday)
-
-    def add_phone(self):
-        pass
-
-    def delete_phone(self):
-        pass
-
-    def change_phone(self):
-        pass
-
-    def days_to_birthday(self):
-        pass
+from dateparser import parse
 
 
 class Field:
     def __init__(self, some_value):
+        self._value = None
         self.value = some_value
 
     @property
     def value(self):
-        return self.some_value
+        return self._value
 
     @value.setter
     def value(self, value):
-        self.some_value = value
+        self._value = value
+
+    def __str__(self):
+        return f'{self.value}'
 
 
 class Name(Field):
-    @property
-    def value(self):
-        return self.some_value
-
-    @value.setter
-    def value(self, value):
-        self.some_value = value
+    pass
 
 
 class Phone(Field):
-    @property
-    def phone_number(self):
-        return self.some_value
-
-    @phone_number.setter
-    def phone_number(self, number):  # для перевірки в візьмемо український номер
+    @Field.value.setter
+    def phone_number(self, value):  # для перевірки в візьмемо український номер
         flag = True
-        for i in number:
+        for i in value:
             if i.isdigit() or i in '+':
                 continue
             else:
                 flag = False
                 return f'Wrong number'
         if flag:
-            if number.startswith('+38') and len(number) == 13:
-                self.some_value = number
-            elif len(number) == 10:
-                self.some_value = number
+            if value.startswith('+38') and len(value) == 13:
+                self._value = value
+            elif len(value) == 10:
+                self._value = value
         else:
             return f'Wrong number'
 
 
-class Birthday:
-    def __init__(self, value):
-        self.value = value
-
-    @property
-    def birthday(self):
-        return self.value
-
-    @birthday.setter
-    def birthday(self, value):
+class Birthday(Field):
+    def valid_date(self, value: str):
         try:
-            date_parce = dateparser.parse(value)
-            self.value = date_parce
-        except:
-            raise f'Wrong birthday date'
+            obj_datetime = parse(value)
+            return obj_datetime
+        except Exception:
+            raise 'Wrong data type. Try "dd-mm-yy"'
+
+    @Field.value.setter
+    def value(self, value):
+        self._value = value
+
+
+class AddressBook(UserDict):
+    def add_record(self, record):
+        self.data[record.name.value] = record
+
+    def iterator(self, n=1):
+        count = 0
+        if n < 0:
+            raise ValueError('Value must be positive')
+        else:
+            for key, value in self.data.items():
+                result = f'{key}: {str(value)}'
+                yield result
+                result = ''
+                count += 1
+                if count == n:
+                    break
+
+
+class Record:
+    def __init__(self, name: Name, phone: Phone, birthday=None):
+        self.name = name
+        self.phones = []
+        if phone:
+            self.phones.append(phone)
+            self.phone = phone
+        if birthday:
+            b_date = birthday.valid_date(str(birthday))
+            self.birthday = b_date
+
+    def __str__(self):
+        return f'{self.name}, {self.phone}, {self.birthday.date()}'
+
+    def add_phone(self, phone: Phone):
+        self.phones.append(phone)
+
+    def delete_phone(self, phone: Phone):
+        if phone not in self.phones:
+            raise KeyError(f'Wrong number or {phone} frone is not recorded')
+        self.phones.remove(phone)
+
+    def change_phone(self, phone: Phone):
+        if phone in self.phones:
+            indx = self.phones.index(phone)
+            self.phones[indx] = phone
+        else:
+            raise ValueError(f'{phone} is not in record')
+
+    def days_to_birthday(self):
+        if self.birthday == None:
+            raise "No birthday set for the contact."
+        d_now = datetime.now()
+        if d_now > self.birthday:
+            bday = self.birthday.replace(year=d_now.year + 1)
+        return (bday - d_now).days
 
 
 if __name__ == "__main__":
-    name = Name('Bill')
-    phone = Phone('1234567890')
-    birthday = '19-02-1999'
-    rec = Record(name, phone, birthday)
+    name_1 = Name('Bill')
+    phone_1 = Phone('1234567890')
+    b_day_1 = Birthday('1992-04-04')
+
+    name_2 = Name('serg')
+    phone_2 = Phone('1234567890')
+    b_day_2 = Birthday('1995.3.2')
+
+    name_3 = Name('Oleg')
+    phone_3 = Phone('1234567890')
+    b_day_3 = Birthday('2 02 1967')
+
+    name_4 = Name('Max')
+    phone_4 = Phone('1234567890')
+    b_day_4 = Birthday('19*02*1999')
+
+    rec_1 = Record(name_1, phone_1, b_day_1)
+    rec_2 = Record(name_2, phone_2, b_day_2)
+    rec_3 = Record(name_3, phone_3, b_day_3)
+    rec_4 = Record(name_4, phone_4, b_day_4)
     ab = AddressBook()
-    ab.add_record(rec)
-    assert isinstance(ab['Bill'], Record)
-    assert isinstance(ab['Bill'].name, Name)
-    assert isinstance(ab['Bill'].phones, list)
-    assert isinstance(ab['Bill'].phones[0], Phone)
-    assert ab['Bill'].phones[0].value == '1234567890'
-    print('All Ok)')
-    for i in ab:
+
+    ab.add_record(rec_1)
+    ab.add_record(rec_2)
+    ab.add_record(rec_3)
+    ab.add_record(rec_4)
+
+    print('All Ok')
+
+    for i in ab.iterator(4):
         print(i)
+
+    print(rec_1.days_to_birthday())
+    print(rec_2.days_to_birthday())
+    print(rec_3.days_to_birthday())
+    print(rec_4.days_to_birthday())
